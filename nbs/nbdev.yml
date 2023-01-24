@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "paramfittorchdemo"
+  site-url: "https://khannay.github.io/paramfittorchdemo"
+  description: "How to use pytorch to fit parameters of differential equations"
+  repo-branch: main
+  repo-url: "https://github.com/khannay/paramfittorchdemo"
