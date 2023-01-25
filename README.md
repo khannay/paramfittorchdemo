@@ -6,7 +6,7 @@ Parameter Fitting Differential Equations with pytorch
 Checkout the
 [documentation](https://khannay.github.io/paramfittorchdemo/)
 
-![tests](https://github.com/github/docs/actions/workflows/test.yml/badge.svg)
+![docs](https://github.com/khannay/paramfittorchdemo/blob/main/.github/workflows/deploy.yaml/badge.svg)
 
 ## Install
 
