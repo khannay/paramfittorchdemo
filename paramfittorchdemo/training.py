@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['SimODEData', 'create_sim_dataset', 'train']
 
-# %% ../nbs/01_training.ipynb 2
+# %% ../nbs/01_training.ipynb 3
 import torch 
 import torch.nn as nn
 from torchdiffeq import odeint
@@ -12,7 +12,7 @@ from torch.utils.data import Dataset, DataLoader
 from typing import Callable, List, Tuple, Union, Optional
 from .models import *
 
-# %% ../nbs/01_training.ipynb 3
+# %% ../nbs/01_training.ipynb 4
 class SimODEData(Dataset):
     """ 
         A very simple dataset class for simulating ODEs, really could just use
@@ -35,7 +35,7 @@ class SimODEData(Dataset):
 
       
 
-# %% ../nbs/01_training.ipynb 4
+# %% ../nbs/01_training.ipynb 5
 def create_sim_dataset(model: nn.Module, # model to simulate from
                        ts: torch.Tensor, # Time points to simulate at
                        num_samples: int = 10, # Number of samples to generate
@@ -55,7 +55,7 @@ def create_sim_dataset(model: nn.Module, # model to simulate from
     
 
 
-# %% ../nbs/01_training.ipynb 5
+# %% ../nbs/01_training.ipynb 6
 def train(model: torch.nn.Module, 
           data: SimODEData, 
           lr: float = 1e-2, 
