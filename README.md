@@ -6,6 +6,9 @@ paramfittorchdemo
 This file will become your README and also the index of your
 documentation.
 
+Checkout the
+[documentation](https://khannay.github.io/paramfittorchdemo/)
+
 ## Install
 
 ``` sh
