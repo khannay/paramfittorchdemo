@@ -2,5 +2,4 @@ website:
   sidebar:
     contents:
       - index.ipynb
-      - 00_models.ipynb
-      - 01_training.ipynb
+      - 00_training.ipynb
