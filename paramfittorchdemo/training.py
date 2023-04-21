@@ -155,9 +155,6 @@ def create_sim_dataset(model: nn.Module, # model to simulate from
     return SimODEData(ts_list, states_list, true_model=model)
 
 # %% ../nbs/00_training.ipynb 44
-from typing import Tuple
-
-
 def plot_time_series(true_model: torch.nn.Module, # true underlying model for the simulated data
                      fit_model: torch.nn.Module, # model fit to the data
                      data: SimODEData, # data set to plot (scatter)
@@ -277,7 +274,7 @@ def train(model: torch.nn.Module, # Model to train
 
 
 
-# %% ../nbs/00_training.ipynb 80
+# %% ../nbs/00_training.ipynb 81
 class NeuralDiffEq(nn.Module):
     """ 
     Basic Neural ODE model
