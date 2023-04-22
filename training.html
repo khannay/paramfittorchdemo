@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.475">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="How to use differential equations layers in pytorch">
+
+<title>paramfittorchdemo - Differential Equations as a Pytorch Neural Network Layer</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="paramfittorchdemo - Differential Equations as a Pytorch Neural Network Layer">
+<meta property="og:description" content="How to use differential equations layers in pytorch">
+<meta property="og:site-name" content="paramfittorchdemo">
+<meta name="twitter:title" content="paramfittorchdemo - Differential Equations as a Pytorch Neural Network Layer">
+<meta name="twitter:description" content="How to use differential equations layers in pytorch">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">paramfittorchdemo</span>
+    </a>
+  </div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">Differential Equations as a Pytorch Neural Network Layer</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">paramfittorchdemo</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./training.html" class="sidebar-item-text sidebar-link active">Differential Equations as a Pytorch Neural Network Layer</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#what-is-the-problem-we-are-trying-to-solve" id="toc-what-is-the-problem-we-are-trying-to-solve" class="nav-link active" data-scroll-target="#what-is-the-problem-we-are-trying-to-solve">What is the problem we are trying to solve?</a></li>
+  <li><a href="#models" id="toc-models" class="nav-link" data-scroll-target="#models">Models</a>
+  <ul class="collapse">
+  <li><a href="#van-der-pol-oscillator-vdp" id="toc-van-der-pol-oscillator-vdp" class="nav-link" data-scroll-target="#van-der-pol-oscillator-vdp">van Der Pol Oscillator (VDP)</a></li>
+  <li><a href="#vdp" id="toc-vdp" class="nav-link" data-scroll-target="#vdp">VDP</a></li>
+  <li><a href="#lotka-volterra-predator-prey-equations" id="toc-lotka-volterra-predator-prey-equations" class="nav-link" data-scroll-target="#lotka-volterra-predator-prey-equations">Lotka Volterra Predator Prey equations</a></li>
+  <li><a href="#lotkavolterra" id="toc-lotkavolterra" class="nav-link" data-scroll-target="#lotkavolterra">LotkaVolterra</a></li>
+  <li><a href="#lorenz-system" id="toc-lorenz-system" class="nav-link" data-scroll-target="#lorenz-system">Lorenz system</a></li>
+  <li><a href="#lorenz" id="toc-lorenz" class="nav-link" data-scroll-target="#lorenz">Lorenz</a></li>
+  </ul></li>
+  <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data">Data</a>
+  <ul class="collapse">
+  <li><a href="#simodedata" id="toc-simodedata" class="nav-link" data-scroll-target="#simodedata">SimODEData</a></li>
+  <li><a href="#create_sim_dataset" id="toc-create_sim_dataset" class="nav-link" data-scroll-target="#create_sim_dataset">create_sim_dataset</a></li>
+  <li><a href="#plot_time_series" id="toc-plot_time_series" class="nav-link" data-scroll-target="#plot_time_series">plot_time_series</a></li>
+  <li><a href="#plot_phase_plane" id="toc-plot_phase_plane" class="nav-link" data-scroll-target="#plot_phase_plane">plot_phase_plane</a></li>
+  </ul></li>
+  <li><a href="#training-loop" id="toc-training-loop" class="nav-link" data-scroll-target="#training-loop">Training Loop</a>
+  <ul class="collapse">
+  <li><a href="#train" id="toc-train" class="nav-link" data-scroll-target="#train">train</a></li>
+  </ul></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a>
+  <ul class="collapse">
+  <li><a href="#fitting-the-vdp-oscillator" id="toc-fitting-the-vdp-oscillator" class="nav-link" data-scroll-target="#fitting-the-vdp-oscillator">Fitting the VDP Oscillator</a></li>
+  <li><a href="#lotka-voltera-equations" id="toc-lotka-voltera-equations" class="nav-link" data-scroll-target="#lotka-voltera-equations">Lotka Voltera Equations</a></li>
+  <li><a href="#lorenz-equations" id="toc-lorenz-equations" class="nav-link" data-scroll-target="#lorenz-equations">Lorenz Equations</a></li>
+  </ul></li>
+  <li><a href="#intro-to-neural-differential-equations" id="toc-intro-to-neural-differential-equations" class="nav-link" data-scroll-target="#intro-to-neural-differential-equations">Intro to Neural Differential Equations</a>
+  <ul class="collapse">
+  <li><a href="#neuraldiffeq" id="toc-neuraldiffeq" class="nav-link" data-scroll-target="#neuraldiffeq">NeuralDiffEq</a></li>
+  <li><a href="#conclusions-and-wrap-up" id="toc-conclusions-and-wrap-up" class="nav-link" data-scroll-target="#conclusions-and-wrap-up">Conclusions and Wrap-Up</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/khannay/paramfittorchdemo/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Differential Equations as a Pytorch Neural Network Layer</h1>
+</div>
+
+<div>
+  <div class="description">
+    How to use differential equations layers in pytorch
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p><a href="https://colab.research.google.com/github/khannay/paramfittorchdemo/blob/main/nbs/00_training.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a></p>
+<section id="what-is-the-problem-we-are-trying-to-solve" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-the-problem-we-are-trying-to-solve">What is the problem we are trying to solve?</h2>
+<p>Let’s say we have some time series data y(t) that we want to model with a differential equation. The data takes the form of a set of observations yᵢ at times tᵢ. Based on some domain knowledge of the underlying system we can write down a differential equation to approximate the system.</p>
+<p>In the most general form this takes the form:</p>
+<p><span class="math display">\[\begin{align}
+\frac{dy}{dt} = f(y,t;\theta)  \\
+y(t_0) = y_0
+\end{align}\]</span></p>
+<p>where <span class="math inline">\(y\)</span> is the state of the system, <span class="math inline">\(t\)</span> is time, and <span class="math inline">\(\theta\)</span> are the parameters of the model. In this post we will assume that the parameters <span class="math inline">\(\theta\)</span> are unknown and we want to learn them from the data.</p>
+<p>Let’s import the libraries we will need for this post. The only non standard machine learning library we will use the <a href="https://github.com/rtqichen/torchdiffeq"> torchdiffeq </a> library to solve the differential equations. This library implements numerical differential equation solvers in pytorch.</p>
+</section>
+<section id="models" class="level2">
+<h2 class="anchored" data-anchor-id="models">Models</h2>
+<p>The first step of our modeling process is to define the model. For differential equations this means we must choose a form for the function <span class="math inline">\(f(y,t;\theta)\)</span> and a way to represent the parameters <span class="math inline">\(\theta\)</span>. We also need to do this in a way that is compatible with pytorch.</p>
+<p>This means we need to encode our function as a torch.nn.Module class. As you will see this is pretty easy and only requires defining two methods. Lets get started with the first of out three example models.</p>
+<section id="van-der-pol-oscillator-vdp" class="level3">
+<h3 class="anchored" data-anchor-id="van-der-pol-oscillator-vdp">van Der Pol Oscillator (VDP)</h3>
+<p>We can define a differential equation system using the <i> torch.nn.Module </i> class where the parameters are created using the <i> torch.nn.Parameter </i> declaration. This lets pytorch know that we want to accumulate gradients for those parameters. We can also include fixed parameters (don’t want to fit these) by just not wrapping them with this declaration.</p>
+<p>The first example we will use is the classic VDP oscillator which is a nonlinear oscillator with a single parameter <span class="math inline">\(\mu\)</span>. The differential equations for this system are:</p>
+<p><span class="math display">\[\begin{align}
+\frac{dX}{dt} &amp;= \mu(x-\frac{1}{3}x^3-y)  \\
+\frac{dY}{dt} &amp;= \frac{x}{\mu}  \\
+\end{align}\]</span></p>
+<p>where <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are the state variables. The VDP model is used to model everything from electronic circuits to cardiac arrhythmias and circadian rhythms. We can define this system in pytorch as follows:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> VDP(nn.Module):</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">""" </span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Define the Van der Pol oscillator as a PyTorch module.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                 mu: <span class="bu">float</span>, <span class="co"># Stiffness parameter of the VDP oscillator</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                 ):</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>() </span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.mu <span class="op">=</span> torch.nn.Parameter(torch.tensor(mu)) <span class="co"># make mu a learnable parameter</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>                t: <span class="bu">float</span>, <span class="co"># time index</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>                state: torch.TensorType, <span class="co"># state of the system first dimension is the batch size</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>                ) <span class="op">-&gt;</span> torch.Tensor: <span class="co"># return the derivative of the state</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">""" </span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">            Define the right hand side of the VDP oscillator.</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> state[..., <span class="dv">0</span>] <span class="co"># first dimension is the batch size</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> state[..., <span class="dv">1</span>]</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        dX <span class="op">=</span> <span class="va">self</span>.mu<span class="op">*</span>(x<span class="op">-</span><span class="dv">1</span><span class="op">/</span><span class="dv">3</span><span class="op">*</span>x<span class="op">**</span><span class="dv">3</span> <span class="op">-</span> y)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        dY <span class="op">=</span> <span class="dv">1</span><span class="op">/</span><span class="va">self</span>.mu<span class="op">*</span>x</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># trick to make sure our return value has the same shape as the input</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        dfunc <span class="op">=</span> torch.zeros_like(state) </span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        dfunc[..., <span class="dv">0</span>] <span class="op">=</span> dX</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        dfunc[..., <span class="dv">1</span>] <span class="op">=</span> dY</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> dfunc</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__repr__</span>(<span class="va">self</span>):</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Print the parameters of the model."""</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ss">f" mu: </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>mu<span class="sc">.</span>item()<span class="sc">}</span><span class="ss">"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/khannay/paramfittorchdemo/blob/main/paramfittorchdemo/training.py#L17" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="vdp" class="level3">
+<h3 class="anchored" data-anchor-id="vdp">VDP</h3>
+<blockquote class="blockquote">
+<pre><code> VDP (mu:float)</code></pre>
+</blockquote>
+<p>Define the Van der Pol oscillator as a PyTorch module.</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>mu</td>
+<td>float</td>
+<td>Stiffness parameter of the VDP oscillator</td>
+</tr>
+</tbody>
+</table>
+<p>You only need to define the dunder init method (<strong>init</strong>) and the forward method. I added a string method <strong>repr</strong> to pretty print the parameter. The key point here is how we can translate from the differential equation to torch code in the forward method. This method needs to define the right-hand side of the differential equation.</p>
+<p>Let’s see how we can integrate this model using the odeint method from torchdiffeq:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>vdp_model <span class="op">=</span> VDP(mu<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a time vector, this is the time axis of the ODE</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>ts <span class="op">=</span> torch.linspace(<span class="dv">0</span>,<span class="fl">30.0</span>,<span class="dv">1000</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a batch of initial conditions </span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>batch_size <span class="op">=</span> <span class="dv">30</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Creates some random initial conditions</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>initial_conditions <span class="op">=</span> torch.tensor([<span class="fl">0.01</span>, <span class="fl">0.01</span>]) <span class="op">+</span> <span class="fl">0.2</span><span class="op">*</span>torch.randn((batch_size,<span class="dv">2</span>))</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Solve the ODE, odeint comes from torchdiffeq</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>sol <span class="op">=</span> odeint(vdp_model, initial_conditions, ts, method<span class="op">=</span><span class="st">'dopri5'</span>).detach().numpy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>plt.plot(ts, sol[:,:,<span class="dv">0</span>], lw<span class="op">=</span><span class="fl">0.5</span>)<span class="op">;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Time series of the VDP oscillator"</span>)<span class="op">;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"time"</span>)<span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"x"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="00_training_files/figure-html/cell-5-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Here is a phase plane plot of the solution (a phase plane plot of a parametric plot of the dynamical state).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the solution</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>plt.plot(sol[:,:,<span class="dv">0</span>], sol[:,:,<span class="dv">1</span>], lw<span class="op">=</span><span class="fl">0.5</span>)<span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Phase plot of the VDP oscillator"</span>)<span class="op">;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"x"</span>)<span class="op">;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"y"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="00_training_files/figure-html/cell-6-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The colors indicate the 30 seperate trajectories in our batch. The solution comes back as a torch tensor with dimensions (time_points, batch number, dynamical_dimension).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>sol.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>(1000, 30, 2)</code></pre>
+</div>
+</div>
+</section>
+<section id="lotka-volterra-predator-prey-equations" class="level3">
+<h3 class="anchored" data-anchor-id="lotka-volterra-predator-prey-equations">Lotka Volterra Predator Prey equations</h3>
+<p>As another example we create a module for the Lotka Volterra predator-prey equations. In the Lotka-Volterra (LV) predator-prey model, there are two primary variables: the population of prey (<span class="math inline">\(x\)</span>) and the population of predators (<span class="math inline">\(y\)</span>). The model is defined by the following equations:</p>
+<p><span class="math display">\[\begin{align}
+\frac{dx}{dt} &amp;= \alpha x - \beta xy \\
+\frac{dy}{dt} &amp;= -\delta y + \gamma xy \\
+\end{align}\]</span></p>
+<p>The population of prey (<span class="math inline">\(x\)</span>) represents the number of individuals of the prey species present in the ecosystem at any given time. The population of predators (<span class="math inline">\(y\)</span>) represents the number of individuals of the predator species present in the ecosystem at any given time.</p>
+<p>In addition to the primary variables, there are also four parameters that are used to describe various ecological factors in the model:</p>
+<p><span class="math inline">\(\alpha\)</span> represents the intrinsic growth rate of the prey population in the absence of predators. <span class="math inline">\(\beta\)</span> represents the predation rate of the predators on the prey. <span class="math inline">\(\gamma\)</span> represents the death rate of the predator population in the absence of prey. <span class="math inline">\(\delta\)</span> represents the efficiency with which the predators convert the consumed prey into new predator biomass.</p>
+<p>Together, these variables and parameters describe the dynamics of predator-prey interactions in an ecosystem and are used to mathematically model the changes in the populations of prey and predators over time.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LotkaVolterra(nn.Module):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">""" </span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">     The Lotka-Volterra equations are a pair of first-order, non-linear, differential equations</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">     describing the dynamics of two species interacting in a predator-prey relationship.</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>                 alpha: <span class="bu">float</span> <span class="op">=</span> <span class="fl">1.5</span>, <span class="co"># The alpha parameter of the Lotka-Volterra system</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>                 beta: <span class="bu">float</span> <span class="op">=</span> <span class="fl">1.0</span>, <span class="co"># The beta parameter of the Lotka-Volterra system</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>                 delta: <span class="bu">float</span> <span class="op">=</span> <span class="fl">3.0</span>, <span class="co"># The delta parameter of the Lotka-Volterra system</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>                 gamma: <span class="bu">float</span> <span class="op">=</span> <span class="fl">1.0</span> <span class="co"># The gamma parameter of the Lotka-Volterra system</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>                 ) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model_params <span class="op">=</span> torch.nn.Parameter(torch.tensor([alpha, beta, delta, gamma]))</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, t, state):</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> state[...,<span class="dv">0</span>]      <span class="co">#variables are part of vector array u </span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> state[...,<span class="dv">1</span>]</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>        sol <span class="op">=</span> torch.zeros_like(state)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">#coefficients are part of tensor model_params</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        alpha, beta, delta, gamma <span class="op">=</span> <span class="va">self</span>.model_params    </span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        sol[...,<span class="dv">0</span>] <span class="op">=</span> alpha<span class="op">*</span>x <span class="op">-</span> beta<span class="op">*</span>x<span class="op">*</span>y</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        sol[...,<span class="dv">1</span>] <span class="op">=</span> <span class="op">-</span>delta<span class="op">*</span>y <span class="op">+</span> gamma<span class="op">*</span>x<span class="op">*</span>y</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> sol</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__repr__</span>(<span class="va">self</span>):</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ss">f" alpha: </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>model_params[<span class="dv">0</span>]<span class="sc">.</span>item()<span class="sc">}</span><span class="ss">, </span><span class="ch">\</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="ss">            beta: </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>model_params[<span class="dv">1</span>]<span class="sc">.</span>item()<span class="sc">}</span><span class="ss">, </span><span class="ch">\</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="ss">                delta: </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>model_params[<span class="dv">2</span>]<span class="sc">.</span>item()<span class="sc">}</span><span class="ss">, </span><span class="ch">\</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="ss">                    gamma: </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>model_params[<span class="dv">3</span>]<span class="sc">.</span>item()<span class="sc">}</span><span class="ss">"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/khannay/paramfittorchdemo/blob/main/paramfittorchdemo/training.py#L51" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="lotkavolterra" class="level3">
+<h3 class="anchored" data-anchor-id="lotkavolterra">LotkaVolterra</h3>
+<blockquote class="blockquote">
+<pre><code> LotkaVolterra (alpha:float=1.5, beta:float=1.0, delta:float=3.0,
+                gamma:float=1.0)</code></pre>
+</blockquote>
+<p>The Lotka-Volterra equations are a pair of first-order, non-linear, differential equations describing the dynamics of two species interacting in a predator-prey relationship.</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>alpha</td>
+<td>float</td>
+<td>1.5</td>
+<td>The alpha parameter of the Lotka-Volterra system</td>
+</tr>
+<tr class="even">
+<td>beta</td>
+<td>float</td>
+<td>1.0</td>
+<td>The beta parameter of the Lotka-Volterra system</td>
+</tr>
+<tr class="odd">
+<td>delta</td>
+<td>float</td>
+<td>3.0</td>
+<td>The delta parameter of the Lotka-Volterra system</td>
+</tr>
+<tr class="even">
+<td>gamma</td>
+<td>float</td>
+<td>1.0</td>
+<td>The gamma parameter of the Lotka-Volterra system</td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>None</strong></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>This follows the same pattern as the first example, the main difference is that we now have four parameters and store them as a model_params tensor. Here is the integration and plotting code for the predator-prey equations.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>lv_model <span class="op">=</span> LotkaVolterra() <span class="co">#use default parameters</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>ts <span class="op">=</span> torch.linspace(<span class="dv">0</span>,<span class="fl">30.0</span>,<span class="dv">1000</span>) </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>batch_size <span class="op">=</span> <span class="dv">30</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a batch of initial conditions (batch_dim, state_dim) as small perturbations around one value</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>initial_conditions <span class="op">=</span> torch.tensor([[<span class="dv">3</span>,<span class="dv">3</span>]]) <span class="op">+</span> <span class="fl">0.50</span><span class="op">*</span>torch.randn((batch_size,<span class="dv">2</span>))</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>sol <span class="op">=</span> odeint(lv_model, initial_conditions, ts, method<span class="op">=</span><span class="st">'dopri5'</span>).detach().numpy()</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the solution</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>plt.plot(ts, sol[:,:,<span class="dv">0</span>], lw<span class="op">=</span><span class="fl">0.5</span>)<span class="op">;</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Time series of the Lotka-Volterra system"</span>)<span class="op">;</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"time"</span>)<span class="op">;</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"x"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="00_training_files/figure-html/cell-10-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Now a phase plane plot of the system:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>plt.plot(sol[:,:,<span class="dv">0</span>], sol[:,:,<span class="dv">1</span>], lw<span class="op">=</span><span class="fl">0.5</span>)<span class="op">;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Phase plot of the Lotka-Volterra system"</span>)<span class="op">;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"x"</span>)<span class="op">;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"y"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="00_training_files/figure-html/cell-11-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="lorenz-system" class="level3">
+<h3 class="anchored" data-anchor-id="lorenz-system">Lorenz system</h3>
+<p>The last example we will use is the Lorenz equations which are famous for their beatiful plots illustrating chaotic dynamics. They originally came from a reduced model for fluid dynamics and take the form:</p>
+<p><span class="math display">\[\begin{align}
+\frac{dx}{dt} &amp;= \sigma(y - x) \\
+\frac{dy}{dt} &amp;= x(\rho - z) - y \\
+\frac{dz}{dt} &amp;= xy - \beta z
+\end{align}\]</span></p>
+<p>where <span class="math inline">\(x\)</span>, <span class="math inline">\(y\)</span>, and <span class="math inline">\(z\)</span> are the state variables, and <span class="math inline">\(\sigma\)</span>, <span class="math inline">\(\rho\)</span>, and <span class="math inline">\(\beta\)</span> are the system parameters.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Lorenz(nn.Module):</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">""" </span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Define the Lorenz system as a PyTorch module.</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>                 sigma: <span class="bu">float</span> <span class="op">=</span><span class="fl">10.0</span>, <span class="co"># The sigma parameter of the Lorenz system</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                 rho: <span class="bu">float</span><span class="op">=</span><span class="fl">28.0</span>, <span class="co"># The rho parameter of the Lorenz system</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>                beta: <span class="bu">float</span><span class="op">=</span><span class="fl">8.0</span><span class="op">/</span><span class="dv">3</span>, <span class="co"># The beta parameter of the Lorenz system</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>                ):</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>() </span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model_params <span class="op">=</span> torch.nn.Parameter(torch.tensor([sigma, rho, beta]))</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, t, state):</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> state[...,<span class="dv">0</span>]      <span class="co">#variables are part of vector array u </span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> state[...,<span class="dv">1</span>]</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        z <span class="op">=</span> state[...,<span class="dv">2</span>]</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        sol <span class="op">=</span> torch.zeros_like(state)</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>        sigma, rho, beta <span class="op">=</span> <span class="va">self</span>.model_params    <span class="co">#coefficients are part of vector array p</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>        sol[...,<span class="dv">0</span>] <span class="op">=</span> sigma<span class="op">*</span>(y<span class="op">-</span>x)</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>        sol[...,<span class="dv">1</span>] <span class="op">=</span> x<span class="op">*</span>(rho<span class="op">-</span>z) <span class="op">-</span> y</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>        sol[...,<span class="dv">2</span>] <span class="op">=</span> x<span class="op">*</span>y <span class="op">-</span> beta<span class="op">*</span>z</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> sol</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__repr__</span>(<span class="va">self</span>):</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="ss">f" sigma: </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>model_params[<span class="dv">0</span>]<span class="sc">.</span>item()<span class="sc">}</span><span class="ss">, </span><span class="ch">\</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a><span class="ss">            rho: </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>model_params[<span class="dv">1</span>]<span class="sc">.</span>item()<span class="sc">}</span><span class="ss">, </span><span class="ch">\</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a><span class="ss">                beta: </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>model_params[<span class="dv">2</span>]<span class="sc">.</span>item()<span class="sc">}</span><span class="ss">"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/khannay/paramfittorchdemo/blob/main/paramfittorchdemo/training.py#L85" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="lorenz" class="level3">
+<h3 class="anchored" data-anchor-id="lorenz">Lorenz</h3>
+<blockquote class="blockquote">
+<pre><code> Lorenz (sigma:float=10.0, rho:float=28.0, beta:float=2.6666666666666665)</code></pre>
+</blockquote>
+<p>Define the Lorenz system as a PyTorch module.</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>sigma</td>
+<td>float</td>
+<td>10.0</td>
+<td>The sigma parameter of the Lorenz system</td>
+</tr>
+<tr class="even">
+<td>rho</td>
+<td>float</td>
+<td>28.0</td>
+<td>The rho parameter of the Lorenz system</td>
+</tr>
+<tr class="odd">
+<td>beta</td>
+<td>float</td>
+<td>2.6666666666666665</td>
+<td>The beta parameter of the Lorenz system</td>
+</tr>
+</tbody>
+</table>
+<p>This shows how to integrate this system and plot the results. This system (at these parameter values) shows chaotic dynamics so initial conditions that start off close together diverge from one another exponetially.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>lorenz_model <span class="op">=</span> Lorenz()</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>ts <span class="op">=</span> torch.linspace(<span class="dv">0</span>,<span class="fl">50.0</span>,<span class="dv">3000</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>batch_size <span class="op">=</span> <span class="dv">30</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a batch of initial conditions (batch_dim, state_dim) as small perturbations around one value</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>initial_conditions <span class="op">=</span> torch.tensor([[<span class="fl">1.0</span>,<span class="fl">0.0</span>,<span class="fl">0.0</span>]]) <span class="op">+</span> <span class="fl">0.10</span><span class="op">*</span>torch.randn((batch_size,<span class="dv">3</span>))</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>sol <span class="op">=</span> odeint(lorenz_model, initial_conditions, ts, method<span class="op">=</span><span class="st">'dopri5'</span>).detach().numpy()</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the solution</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>plt.plot(ts[:<span class="dv">2000</span>], sol[:<span class="dv">2000</span>,:,<span class="dv">0</span>], lw<span class="op">=</span><span class="fl">0.5</span>)<span class="op">;</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Time series of the Lorenz system"</span>)<span class="op">;</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"time"</span>)<span class="op">;</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"x"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="00_training_files/figure-html/cell-14-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Here we show the famous butterfly plot (phase plane plot) for the first set of initial conditions in the batch.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>plt.plot(sol[:,<span class="dv">0</span>,<span class="dv">0</span>], sol[:,<span class="dv">0</span>,<span class="dv">1</span>], color<span class="op">=</span><span class="st">'black'</span>, lw<span class="op">=</span><span class="fl">0.5</span>)<span class="op">;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Phase plot of the Lorenz system"</span>)<span class="op">;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"x"</span>)<span class="op">;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"y"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="00_training_files/figure-html/cell-15-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="data" class="level2">
+<h2 class="anchored" data-anchor-id="data">Data</h2>
+<p>Now that we can define the differential equation models in pytorch we need to create some data to be used in training. This is where things start to get really neat as we see our first glimpse of being able to hijack deep learning machinery for fitting the parameters. Really we could just use tensor of data directly, but this is a nice way to organize the data. It will also be useful if you have some experimental data that you want to use.</p>
+<p>Torch provides the <i> Dataset </i> class for loading in data. To use it you just need to create a subclass and define two methods. The <code>__len__</code> function that returns the number of data points and a <code>__getitem__</code> function that returns the data point at a given index. If you are wondering these methods are what underly the <code>len(array)</code> and ’array[0]` subscript access in python lists.</p>
+<p>The rest of boilerplate code needed in defined in the parent class <code>torch.utils.data.Dataset</code>. We will see the power of these method when we go to define a training loop.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SimODEData(Dataset):</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">""" </span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">        A very simple dataset class for simulating ODEs</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>                 ts: List[torch.Tensor], <span class="co"># List of time points as tensors</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>                 values: List[torch.Tensor], <span class="co"># List of dynamical state values (tensor) at each time point </span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>                 true_model: Union[torch.nn.Module,<span class="va">None</span>] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>                 ) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.ts <span class="op">=</span> ts </span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.values <span class="op">=</span> values </span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.true_model <span class="op">=</span> true_model</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__len__</span>(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.ts)</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, index: <span class="bu">int</span>) <span class="op">-&gt;</span> Tuple[torch.Tensor, torch.Tensor]:</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.ts[index], <span class="va">self</span>.values[index]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/khannay/paramfittorchdemo/blob/main/paramfittorchdemo/training.py#L117" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="simodedata" class="level3">
+<h3 class="anchored" data-anchor-id="simodedata">SimODEData</h3>
+<blockquote class="blockquote">
+<pre><code> SimODEData (ts:List[torch.Tensor], values:List[torch.Tensor],
+             true_model:Optional[torch.nn.modules.module.Module]=None)</code></pre>
+</blockquote>
+<p>A very simple dataset class for simulating ODEs</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ts</td>
+<td>typing.List[torch.Tensor]</td>
+<td></td>
+<td>List of time points as tensors</td>
+</tr>
+<tr class="even">
+<td>values</td>
+<td>typing.List[torch.Tensor]</td>
+<td></td>
+<td>List of dynamical state values (tensor) at each time point</td>
+</tr>
+<tr class="odd">
+<td>true_model</td>
+<td>typing.Optional[torch.nn.modules.module.Module]</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>None</strong></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Next let’s create a quick generator function to generate some simulated data to test the algorithms on. In a real use case the data would be loaded from a file or database, but for this example we will just generate some data. In fact, I recommend that you always start with generated data to make sure your code is working before you try to load real data.</p>
+<hr>
+<p><a href="https://github.com/khannay/paramfittorchdemo/blob/main/paramfittorchdemo/training.py#L139" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="create_sim_dataset" class="level3">
+<h3 class="anchored" data-anchor-id="create_sim_dataset">create_sim_dataset</h3>
+<blockquote class="blockquote">
+<pre><code> create_sim_dataset (model:torch.nn.modules.module.Module,
+                     ts:torch.Tensor, num_samples:int=10,
+                     sigma_noise:float=0.1,
+                     initial_conditions_default:torch.Tensor=tensor([0.,
+                     0.]), sigma_initial_conditions:float=0.1)</code></pre>
+</blockquote>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>model</td>
+<td>Module</td>
+<td></td>
+<td>model to simulate from</td>
+</tr>
+<tr class="even">
+<td>ts</td>
+<td>Tensor</td>
+<td></td>
+<td>Time points to simulate for</td>
+</tr>
+<tr class="odd">
+<td>num_samples</td>
+<td>int</td>
+<td>10</td>
+<td>Number of samples to generate</td>
+</tr>
+<tr class="even">
+<td>sigma_noise</td>
+<td>float</td>
+<td>0.1</td>
+<td>Noise level to add to the data</td>
+</tr>
+<tr class="odd">
+<td>initial_conditions_default</td>
+<td>Tensor</td>
+<td>tensor([0., 0.])</td>
+<td>Default initial conditions</td>
+</tr>
+<tr class="even">
+<td>sigma_initial_conditions</td>
+<td>float</td>
+<td>0.1</td>
+<td>Noise level to add to the initial conditions</td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>SimODEData</strong></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>This just takes in a differential equation model with some initial states and generates some time-series data from it (and adds in some gaussian noise). This data is then passed into our custom dataset container.</p>
+<hr>
+<p><a href="https://github.com/khannay/paramfittorchdemo/blob/main/paramfittorchdemo/training.py#L159" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="plot_time_series" class="level3">
+<h3 class="anchored" data-anchor-id="plot_time_series">plot_time_series</h3>
+<blockquote class="blockquote">
+<pre><code> plot_time_series (true_model:torch.nn.modules.module.Module,
+                   fit_model:torch.nn.modules.module.Module,
+                   data:__main__.SimODEData, time_range:tuple=(0.0, 30.0),
+                   ax:matplotlib.axes._axes.Axes=None, dyn_var_idx:int=0,
+                   title:str='Model fits', *args, **kwargs)</code></pre>
+</blockquote>
+<p>Plot the true model and fit model on the same axes.</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>true_model</td>
+<td>Module</td>
+<td></td>
+<td>true underlying model for the simulated data</td>
+</tr>
+<tr class="even">
+<td>fit_model</td>
+<td>Module</td>
+<td></td>
+<td>model fit to the data</td>
+</tr>
+<tr class="odd">
+<td>data</td>
+<td>SimODEData</td>
+<td></td>
+<td>data set to plot (scatter)</td>
+</tr>
+<tr class="even">
+<td>time_range</td>
+<td>tuple</td>
+<td>(0.0, 30.0)</td>
+<td>range of times to simulate the models for</td>
+</tr>
+<tr class="odd">
+<td>ax</td>
+<td>Axes</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>dyn_var_idx</td>
+<td>int</td>
+<td>0</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>title</td>
+<td>str</td>
+<td>Model fits</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>args</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>kwargs</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>typing.Tuple[matplotlib.figure.Figure, matplotlib.axes._axes.Axes]</strong></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/khannay/paramfittorchdemo/blob/main/paramfittorchdemo/training.py#L194" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="plot_phase_plane" class="level3">
+<h3 class="anchored" data-anchor-id="plot_phase_plane">plot_phase_plane</h3>
+<blockquote class="blockquote">
+<pre><code> plot_phase_plane (true_model:torch.nn.modules.module.Module,
+                   fit_model:torch.nn.modules.module.Module,
+                   data:__main__.SimODEData, time_range:tuple=(0.0, 30.0),
+                   ax:matplotlib.axes._axes.Axes=None,
+                   dyn_var_idx:tuple=(0, 1), title:str='Model fits',
+                   *args, **kwargs)</code></pre>
+</blockquote>
+<p>Plot the true model and fit model on the same axes.</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>true_model</td>
+<td>Module</td>
+<td></td>
+<td>true underlying model for the simulated data</td>
+</tr>
+<tr class="even">
+<td>fit_model</td>
+<td>Module</td>
+<td></td>
+<td>model fit to the data</td>
+</tr>
+<tr class="odd">
+<td>data</td>
+<td>SimODEData</td>
+<td></td>
+<td>data set to plot (scatter)</td>
+</tr>
+<tr class="even">
+<td>time_range</td>
+<td>tuple</td>
+<td>(0.0, 30.0)</td>
+<td>range of times to simulate the models for</td>
+</tr>
+<tr class="odd">
+<td>ax</td>
+<td>Axes</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>dyn_var_idx</td>
+<td>tuple</td>
+<td>(0, 1)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>title</td>
+<td>str</td>
+<td>Model fits</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>args</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>kwargs</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>typing.Tuple[matplotlib.figure.Figure, matplotlib.axes._axes.Axes]</strong></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="training-loop" class="level2">
+<h2 class="anchored" data-anchor-id="training-loop">Training Loop</h2>
+<p>Next we will create a wrapper function for a pytorch training loop. Training means we want to update the model parameters to increase the alignment with the data ( or decrease the misalignment).</p>
+<p>One of the tricks for this from deep learning is to not use all the data before taking a gradient step. Part of this is necessity for using enormous datasets as you can’t fit all of that data inside a GPU’s memory, but this also can help the gradient descent algorithm avoid getting stuck in local minima.</p>
+<p>The training loop in words: * Divide the dataset into mini-batches, these are subsets of your entire data set. Usually want to choose these randomly. * Iterate through the mini-batches, for each mini-batch: * Generate the predictions using the current model parameters * Calculate the loss (here we will use the mean squared error) * Calculate the gradients, using backpropagation.<br>
+* Update the parameters using a gradient descent step. Here we use the Adam optimizer. * Each full pass through the dataset is called an epoch.</p>
+<p>Okay here is the code:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(model: torch.nn.Module, <span class="co"># Model to train</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>          data: SimODEData, <span class="co"># Data to train on</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>          lr: <span class="bu">float</span> <span class="op">=</span> <span class="fl">1e-2</span>, <span class="co"># learning rate for the Adam optimizer</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>          epochs: <span class="bu">int</span> <span class="op">=</span> <span class="dv">10</span>, <span class="co"># Number of epochs to train for</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>          batch_size: <span class="bu">int</span> <span class="op">=</span> <span class="dv">5</span>, <span class="co"># Batch size for training</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>          method <span class="op">=</span> <span class="st">'rk4'</span>, <span class="co"># ODE solver to use</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>          step_size: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.10</span>, <span class="co"># for fixed diffeq solver set the step size</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>          show_every: <span class="bu">int</span> <span class="op">=</span> <span class="dv">10</span>, <span class="co"># How often to print the loss function message</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>          save_plots_every: Union[<span class="bu">int</span>,<span class="va">None</span>] <span class="op">=</span> <span class="va">None</span>, <span class="co"># save a plot of the fit, to disable make this None</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>          model_name: <span class="bu">str</span> <span class="op">=</span> <span class="st">""</span>, <span class="co">#string for the model, used to reference the saved plots </span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>          <span class="op">*</span>args: <span class="bu">tuple</span>, </span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>          <span class="op">**</span>kwargs: <span class="bu">dict</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>          ):</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create a data loader to iterate over the data. This takes in our dataset and returns batches of data</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    trainloader <span class="op">=</span> DataLoader(data, batch_size<span class="op">=</span>batch_size, shuffle<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Choose an optimizer. Adam is a good default choice as a fancy gradient descent</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> torch.optim.Adam(model.parameters(), lr<span class="op">=</span>lr)</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create a loss function this computes the error between the predicted and true values</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    criterion <span class="op">=</span> torch.nn.MSELoss() </span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>        running_loss <span class="op">=</span> <span class="fl">0.0</span> </span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> batchdata <span class="kw">in</span> trainloader:</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>            optimizer.zero_grad() <span class="co"># reset gradients, famous gotcha in a pytorch training loop</span></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>            ts, states <span class="op">=</span> batchdata <span class="co"># unpack the data </span></span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>            initial_state <span class="op">=</span> states[:,<span class="dv">0</span>,:] <span class="co"># grab the initial state</span></span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Make the prediction and then flip the dimensions to be (batch, state_dim, time)</span></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Pytorch expects the batch dimension to be first</span></span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>            pred <span class="op">=</span> odeint(model, initial_state, ts[<span class="dv">0</span>], method<span class="op">=</span>method, options<span class="op">=</span>{<span class="st">'step_size'</span>: step_size}).transpose(<span class="dv">0</span>,<span class="dv">1</span>) </span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Compute the loss</span></span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>            loss <span class="op">=</span> criterion(pred, states)</span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>            <span class="co"># compute gradients</span></span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>            loss.backward() </span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>            <span class="co"># update parameters</span></span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>            optimizer.step() </span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>            running_loss <span class="op">+=</span> loss.item() <span class="co"># record loss</span></span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> epoch <span class="op">%</span> show_every <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"Loss at </span><span class="sc">{</span>epoch<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>running_loss<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Use this to save plots of the fit every save_plots_every epochs</span></span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> save_plots_every <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> epoch <span class="op">%</span> save_plots_every <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>            <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a>                fig, ax <span class="op">=</span> plot_time_series(data.true_model, model, data[<span class="dv">0</span>])</span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a>                ax.set_title(<span class="ss">f"Epoch: </span><span class="sc">{</span>epoch<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a>                fig.savefig(<span class="ss">f"./tmp_plots/</span><span class="sc">{</span>epoch<span class="sc">}</span><span class="ss">_</span><span class="sc">{</span>model_name<span class="sc">}</span><span class="ss">_fit_plot"</span>)</span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a>                plt.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/khannay/paramfittorchdemo/blob/main/paramfittorchdemo/training.py#L230" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="train" class="level3">
+<h3 class="anchored" data-anchor-id="train">train</h3>
+<blockquote class="blockquote">
+<pre><code> train (model:torch.nn.modules.module.Module, data:__main__.SimODEData,
+        lr:float=0.01, epochs:int=10, batch_size:int=5, method='rk4',
+        step_size:float=0.1, show_every:int=10,
+        save_plots_every:Optional[int]=None, model_name:str='',
+        *args:tuple, **kwargs:dict)</code></pre>
+</blockquote>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>model</td>
+<td>Module</td>
+<td></td>
+<td>Model to train</td>
+</tr>
+<tr class="even">
+<td>data</td>
+<td>SimODEData</td>
+<td></td>
+<td>Data to train on</td>
+</tr>
+<tr class="odd">
+<td>lr</td>
+<td>float</td>
+<td>0.01</td>
+<td>learning rate for the Adam optimizer</td>
+</tr>
+<tr class="even">
+<td>epochs</td>
+<td>int</td>
+<td>10</td>
+<td>Number of epochs to train for</td>
+</tr>
+<tr class="odd">
+<td>batch_size</td>
+<td>int</td>
+<td>5</td>
+<td>Batch size for training</td>
+</tr>
+<tr class="even">
+<td>method</td>
+<td>str</td>
+<td>rk4</td>
+<td>ODE solver to use</td>
+</tr>
+<tr class="odd">
+<td>step_size</td>
+<td>float</td>
+<td>0.1</td>
+<td>for fixed diffeq solver set the step size</td>
+</tr>
+<tr class="even">
+<td>show_every</td>
+<td>int</td>
+<td>10</td>
+<td>How often to print the loss function message</td>
+</tr>
+<tr class="odd">
+<td>save_plots_every</td>
+<td>typing.Optional[int]</td>
+<td>None</td>
+<td>save a plot of the fit, to disable make this None</td>
+</tr>
+<tr class="even">
+<td>model_name</td>
+<td>str</td>
+<td></td>
+<td>string for the model, used to reference the saved plots</td>
+</tr>
+<tr class="odd">
+<td>args</td>
+<td>tuple</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>kwargs</td>
+<td>dict</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="examples" class="level2">
+<h2 class="anchored" data-anchor-id="examples">Examples</h2>
+<section id="fitting-the-vdp-oscillator" class="level3">
+<h3 class="anchored" data-anchor-id="fitting-the-vdp-oscillator">Fitting the VDP Oscillator</h3>
+<p>Let’s use this training loop to recover the parameters from simulated VDP oscillator data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>true_mu <span class="op">=</span> <span class="fl">0.30</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>model_sim <span class="op">=</span> VDP(mu<span class="op">=</span>true_mu)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>ts_data <span class="op">=</span> torch.linspace(<span class="fl">0.0</span>,<span class="fl">10.0</span>,<span class="dv">10</span>) </span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>data_vdp <span class="op">=</span> create_sim_dataset(model_sim, </span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>                              ts <span class="op">=</span> ts_data, </span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>                              num_samples<span class="op">=</span><span class="dv">10</span>, </span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>                              sigma_noise<span class="op">=</span><span class="fl">0.01</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s create a model with the wrong parameter value and visualize the starting point.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>vdp_model <span class="op">=</span> VDP(mu <span class="op">=</span> <span class="fl">0.10</span>) </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>plot_time_series(model_sim, </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>                 vdp_model, </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>                 data_vdp[<span class="dv">0</span>], </span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>                 dyn_var_idx<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>                 title <span class="op">=</span> <span class="st">"VDP Model: Before Parameter Fits"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="00_training_files/figure-html/cell-24-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Now, we will use the training loop to fit the parameters of the VDP oscillator to the simulated data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>train(vdp_model, data_vdp, epochs<span class="op">=</span><span class="dv">50</span>, model_name<span class="op">=</span><span class="st">"vdp"</span>)<span class="op">;</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"After training: </span><span class="sc">{</span>vdp_model<span class="sc">}</span><span class="ss">, where the true value is </span><span class="sc">{</span>true_mu<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Final Parameter Recovery Error: </span><span class="sc">{</span>vdp_model<span class="sc">.</span>mu <span class="op">-</span> true_mu<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Loss at 0: 0.09973308071494102
+Loss at 10: 0.005132006946951151
+Loss at 20: 0.0007074056047713384
+Loss at 30: 0.00021287801791913807
+Loss at 40: 0.00020217221026541665
+After training:  mu: 0.3017330467700958, where the true value is 0.3
+Final Parameter Recovery Error: 0.0017330348491668701</code></pre>
+</div>
+</div>
+<p>Not to bad! Let’s see how the plot looks now…</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>plot_time_series(model_sim, vdp_model, data_vdp[<span class="dv">0</span>], dyn_var_idx<span class="op">=</span><span class="dv">1</span>, title <span class="op">=</span> <span class="st">"VDP Model: Before Parameter Fits"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="00_training_files/figure-html/cell-26-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The plot confirms that we almost perfectly recovered the parameter. One more quick plot, where we plot the dynamics of the system in the phase plane (a parametric plot of the state variables).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>plot_phase_plane(model_sim, vdp_model, data_vdp[<span class="dv">0</span>], title <span class="op">=</span> <span class="st">"VDP Model: After Fitting"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="00_training_files/figure-html/cell-27-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="lotka-voltera-equations" class="level3">
+<h3 class="anchored" data-anchor-id="lotka-voltera-equations">Lotka Voltera Equations</h3>
+<p>Now lets adapt our methods to fit simulated data from the Lotka Voltera equations.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>model_sim_lv <span class="op">=</span> LotkaVolterra(<span class="fl">1.5</span>,<span class="fl">1.0</span>,<span class="fl">3.0</span>,<span class="fl">1.0</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>ts_data <span class="op">=</span> torch.arange(<span class="fl">0.0</span>, <span class="fl">10.0</span>, <span class="fl">0.1</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>data_lv <span class="op">=</span> create_sim_dataset(model_sim_lv, </span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>                              ts <span class="op">=</span> ts_data, </span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>                              num_samples<span class="op">=</span><span class="dv">10</span>, </span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>                              sigma_noise<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>                              initial_conditions_default<span class="op">=</span>torch.tensor([<span class="fl">2.5</span>, <span class="fl">2.5</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>model_lv <span class="op">=</span> LotkaVolterra(alpha<span class="op">=</span><span class="fl">1.6</span>, beta<span class="op">=</span><span class="fl">1.1</span>,delta<span class="op">=</span><span class="fl">2.7</span>, gamma<span class="op">=</span><span class="fl">1.2</span>) </span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>plot_time_series(model_sim_lv, model_lv, data <span class="op">=</span> data_lv[<span class="dv">0</span>], title <span class="op">=</span> <span class="st">"Lotka Volterra: Before Fitting"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="00_training_files/figure-html/cell-29-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>train(model_lv, data_lv, epochs<span class="op">=</span><span class="dv">60</span>, lr<span class="op">=</span><span class="fl">1e-2</span>, model_name<span class="op">=</span><span class="st">"lotkavolterra"</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Fitted model: </span><span class="sc">{</span>model_lv<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"True model: </span><span class="sc">{</span>model_sim_lv<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Loss at 0: 1.1245160698890686
+Loss at 10: 0.13308029621839523
+Loss at 20: 0.047104522585868835
+Loss at 30: 0.023627933114767075
+Loss at 40: 0.021535277366638184
+Loss at 50: 0.02137285191565752
+Fitted model:  alpha: 1.5944933891296387,             beta: 1.0464898347854614,                 delta: 2.819714307785034,                     gamma: 0.9388865232467651
+True model:  alpha: 1.5,             beta: 1.0,                 delta: 3.0,                     gamma: 1.0</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>plot_time_series(model_sim_lv, model_lv, data <span class="op">=</span> data_lv[<span class="dv">0</span>], title <span class="op">=</span> <span class="st">"Lotka Volterra: After Fitting"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="00_training_files/figure-html/cell-31-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Now let’s visualize the results using a phase plane plot.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>plot_phase_plane(model_sim_lv, model_lv, data_lv[<span class="dv">0</span>], title<span class="op">=</span> <span class="st">"Phase Plane for Lotka Volterra: After Fitting"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="00_training_files/figure-html/cell-32-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="lorenz-equations" class="level3">
+<h3 class="anchored" data-anchor-id="lorenz-equations">Lorenz Equations</h3>
+<p>Finally, let’s try to fit the Lorenz equations.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>model_sim_lorenz <span class="op">=</span> Lorenz(sigma<span class="op">=</span><span class="fl">10.0</span>, rho<span class="op">=</span><span class="fl">28.0</span>, beta<span class="op">=</span><span class="fl">8.0</span><span class="op">/</span><span class="fl">3.0</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>ts_data <span class="op">=</span> torch.arange(<span class="dv">0</span>, <span class="fl">10.0</span>, <span class="fl">0.05</span>)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>data_lorenz <span class="op">=</span> create_sim_dataset(model_sim_lorenz, </span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>                              ts <span class="op">=</span> ts_data, </span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>                              num_samples<span class="op">=</span><span class="dv">30</span>, </span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>                              initial_conditions_default<span class="op">=</span>torch.tensor([<span class="fl">1.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>]),</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>                              sigma_noise<span class="op">=</span><span class="fl">0.01</span>, </span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>                              sigma_initial_conditions<span class="op">=</span><span class="fl">0.10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>lorenz_model <span class="op">=</span> Lorenz(sigma<span class="op">=</span><span class="fl">10.2</span>, rho<span class="op">=</span><span class="fl">28.2</span>, beta<span class="op">=</span><span class="fl">9.0</span><span class="op">/</span><span class="dv">3</span>) </span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plot_time_series(model_sim_lorenz, lorenz_model, data_lorenz[<span class="dv">0</span>], title<span class="op">=</span><span class="st">"Lorenz Model: Before Fitting"</span>)<span class="op">;</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>ax.set_xlim((<span class="dv">2</span>,<span class="dv">15</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>(2.0, 15.0)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="00_training_files/figure-html/cell-34-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>train(lorenz_model, </span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>      data_lorenz, </span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>      epochs<span class="op">=</span><span class="dv">300</span>, </span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>      batch_size<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>      method <span class="op">=</span> <span class="st">'rk4'</span>,</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>      step_size<span class="op">=</span><span class="fl">0.05</span>,</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>      show_every<span class="op">=</span><span class="dv">50</span>,</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>      lr <span class="op">=</span> <span class="fl">1e-3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Loss at 0: 113.75426864624023
+Loss at 50: 4.351463496685028
+Loss at 100: 2.0423043966293335
+Loss at 150: 1.2441555112600327
+Loss at 200: 0.7774392068386078
+Loss at 250: 0.5306024551391602</code></pre>
+</div>
+</div>
+<p>Let’s look at the results from the fitting procedure. Starting with a full plot of the dynamics.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plot_time_series(model_sim_lorenz, lorenz_model, data_lorenz[<span class="dv">0</span>], title <span class="op">=</span> <span class="st">"Lorenz Model: After Fitting"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="00_training_files/figure-html/cell-36-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Let’s zoom in on the bulk of the data and see how the fit looks.</p>
+<p>You can see the model is very close to the true model for the data range. Now the phase plane plot.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>plot_phase_plane(model_sim_lorenz, lorenz_model, data_lorenz[<span class="dv">0</span>], title <span class="op">=</span> <span class="st">"Lorenz Model: After Fitting"</span>, time_range<span class="op">=</span>(<span class="dv">0</span>,<span class="fl">20.0</span>))<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="00_training_files/figure-html/cell-37-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>You can see that our fitted model performs well for t in [0,17] and then starts to diverge.</p>
+</section>
+</section>
+<section id="intro-to-neural-differential-equations" class="level1">
+<h1>Intro to Neural Differential Equations</h1>
+<p>This is great for the situation where we know the form of the equations on the right-hand-side, but what if we don’t? Can we use this procedure to discover the model equations?</p>
+<p>This is much too big of a subject to cover in this post (stay tuned), but one of the biggest advantages of moving our differential equations models into the torch framework is that we can mix and match them with artificial neural network layers.</p>
+<p>The simplest thing we can do is to replace the right-hand-side <span class="math inline">\(f(y,t; \theta)\)</span> with a neural network layer <span class="math inline">\(l_\theta(y,t)\)</span>. These types of equations have been called a neural differential equations and it can be viewed as generalization of a recurrent neural network (citation).</p>
+<p>Let’s do this for the our simple VDP oscillator system.</p>
+<p>Let’s remake the simulated data, you will notice that I am creating longer time-series of the data, and more samples. Fitting a neural differential equation takes much more data and more computational power since we have many more parameters that need to be determined.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># remake the data </span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>model_sim_vdp <span class="op">=</span> VDP(mu<span class="op">=</span><span class="fl">0.20</span>)</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>ts_data <span class="op">=</span> torch.linspace(<span class="fl">0.0</span>,<span class="fl">30.0</span>,<span class="dv">100</span>) <span class="co"># longer time series than the custom ode layer</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>data_vdp <span class="op">=</span> create_sim_dataset(model_sim_vdp, </span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>                              ts <span class="op">=</span> ts_data, </span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>                              num_samples<span class="op">=</span><span class="dv">30</span>, <span class="co"># more samples than the custom ode layer</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>                              sigma_noise<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>                              initial_conditions_default<span class="op">=</span>torch.tensor([<span class="fl">0.50</span>,<span class="fl">0.10</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NeuralDiffEq(nn.Module):</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">""" </span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Basic Neural ODE model</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>,</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>                 dim: <span class="bu">int</span> <span class="op">=</span> <span class="dv">2</span>, <span class="co"># dimension of the state vector</span></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>                 ) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.ann <span class="op">=</span> nn.Sequential(torch.nn.Linear(dim, <span class="dv">8</span>), </span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>                                 torch.nn.LeakyReLU(), </span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>                                 torch.nn.Linear(<span class="dv">8</span>, <span class="dv">16</span>), </span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>                                 torch.nn.LeakyReLU(), </span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>                                 torch.nn.Linear(<span class="dv">16</span>, <span class="dv">32</span>), </span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>                                 torch.nn.LeakyReLU(), </span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>                                 torch.nn.Linear(<span class="dv">32</span>, dim))</span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, t, state):</span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.ann(state)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/khannay/paramfittorchdemo/blob/main/paramfittorchdemo/training.py#L280" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="neuraldiffeq" class="level3">
+<h3 class="anchored" data-anchor-id="neuraldiffeq">NeuralDiffEq</h3>
+<blockquote class="blockquote">
+<pre><code> NeuralDiffEq (dim:int=2)</code></pre>
+</blockquote>
+<p>Basic Neural ODE model</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>dim</td>
+<td>int</td>
+<td>2</td>
+<td>dimension of the state vector</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>None</strong></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>model_vdp_nde <span class="op">=</span> NeuralDiffEq(dim<span class="op">=</span><span class="dv">2</span>) </span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>plot_time_series(model_sim_vdp, model_vdp_nde, data_vdp[<span class="dv">0</span>], title <span class="op">=</span> <span class="st">"Neural ODE: Before Fitting"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="00_training_files/figure-html/cell-41-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>You can see we start very far away for the correct solution, but then again we are injecting much less information into our model. Let’s see if we can fit the model to get better results.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>train(model_vdp_nde, </span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>      data_vdp, </span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>      epochs<span class="op">=</span><span class="dv">1500</span>, </span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>      lr<span class="op">=</span><span class="fl">1e-3</span>, </span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>      batch_size<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>      show_every<span class="op">=</span><span class="dv">100</span>,</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>      model_name <span class="op">=</span> <span class="st">"nde"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Loss at 0: 84.39617252349854
+Loss at 100: 84.34061241149902
+Loss at 200: 73.75008296966553
+Loss at 300: 3.4929964542388916
+Loss at 400: 1.6555403769016266
+Loss at 500: 0.7814530655741692
+Loss at 600: 0.41551147401332855
+Loss at 700: 0.3157300055027008
+Loss at 800: 0.19066352397203445
+Loss at 900: 0.15869349241256714
+Loss at 1000: 0.12904016114771366
+Loss at 1100: 0.23840919509530067
+Loss at 1200: 0.1681726910173893
+Loss at 1300: 0.09865255374461412
+Loss at 1400: 0.09134986530989408</code></pre>
+</div>
+</div>
+<p>Visualizing the results, we can see that the model is able to fit the data and even extrapolate to the future (although it is not as good or fast as the specified model).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>plot_time_series(model_sim_vdp, model_vdp_nde, data_vdp[<span class="dv">0</span>], title <span class="op">=</span> <span class="st">"Neural ODE: After Fitting"</span>, time_range<span class="op">=</span>(<span class="dv">0</span>,<span class="fl">60.0</span>))<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="00_training_files/figure-html/cell-43-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Now the phase plane plot of our neural differential equation model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>plot_phase_plane(model_sim_vdp, model_vdp_nde, data_vdp[<span class="dv">0</span>], title <span class="op">=</span> <span class="st">"Neural ODE Phase Plane: After Fitting"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="00_training_files/figure-html/cell-44-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>These models take a long time to train and more data to converge on a good fit. This makes sense since we are both trying to learn the model and the parameters at the same time.</p>
+</section>
+<section id="conclusions-and-wrap-up" class="level2">
+<h2 class="anchored" data-anchor-id="conclusions-and-wrap-up">Conclusions and Wrap-Up</h2>
+<p>In this article I have demonstrated how we can use differential equation models within the pytorch ecosytem using the torchdiffeq package. The code from this article is available on <a> github </a> and can be opened directly to google colab for experimentation. You can also install the code from this article using pip (pip install paramfittorchdemo).</p>
+<p>This post is an introduction in the future I will be writing more about the following topics:</p>
+<ul>
+<li>How to blend some mechanistic knowledge of the dynamics with deep learning. These have been called <a href="https://arxiv.org/abs/2001.04385"> universal differential equations </a> as they enable us to combine scientific knowledge with deep learning. This basically blends the two approaches together.</li>
+<li>How to combine differential equation layers with other deep learning layers.</li>
+<li>Model discovery: Can we recover the actual model equations from data? This uses tools like <a href="https://www.pnas.org/doi/10.1073/pnas.1906995116"> SINDy </a> to extract the model equations from data.</li>
+<li>MLOps tools for managing the training of these models. This includes tools like <a href="https://mlflow.org/"> MLFlow </a>, <a href="https://wandb.ai/home"> Weights and Biases </a>, and <a href="https://pytorch.org/docs/stable/tensorboard.html"> Tensorboard </a>.</li>
+<li>Anything else I hear back about from you!</li>
+</ul>
+<p>Happy modeling!</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
