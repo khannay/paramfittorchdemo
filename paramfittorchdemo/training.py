@@ -11,8 +11,9 @@ from torchdiffeq import odeint as odeint
 import pylab as plt
 from torch.utils.data import Dataset, DataLoader
 from typing import Callable, List, Tuple, Union, Optional
+from pathlib import Path  
 
-# %% ../nbs/00_training.ipynb 15
+# %% ../nbs/00_training.ipynb 14
 class VDP(nn.Module):
     """ 
     Define the Van der Pol oscillator as a PyTorch module.
@@ -46,7 +47,7 @@ class VDP(nn.Module):
     
     
 
-# %% ../nbs/00_training.ipynb 26
+# %% ../nbs/00_training.ipynb 25
 class LotkaVolterra(nn.Module):
     """ 
      The Lotka-Volterra equations are a pair of first-order, non-linear, differential equations
@@ -80,7 +81,7 @@ class LotkaVolterra(nn.Module):
                     gamma: {self.model_params[3].item()}"
 
 
-# %% ../nbs/00_training.ipynb 34
+# %% ../nbs/00_training.ipynb 33
 class Lorenz(nn.Module):
     """ 
     Define the Lorenz system as a PyTorch module.
@@ -112,7 +113,7 @@ class Lorenz(nn.Module):
                 beta: {self.model_params[2].item()}"
     
 
-# %% ../nbs/00_training.ipynb 40
+# %% ../nbs/00_training.ipynb 39
 class SimODEData(Dataset):
     """ 
         A very simple dataset class for simulating ODEs
@@ -120,7 +121,7 @@ class SimODEData(Dataset):
     def __init__(self,
                  ts: List[torch.Tensor], # List of time points as tensors
                  values: List[torch.Tensor], # List of dynamical state values (tensor) at each time point 
-                 true_model: torch.nn.Module|None = None,
+                 true_model: Union[torch.nn.Module,None] = None,
                  ) -> None:
         self.ts = ts 
         self.values = values 
@@ -134,7 +135,7 @@ class SimODEData(Dataset):
 
       
 
-# %% ../nbs/00_training.ipynb 42
+# %% ../nbs/00_training.ipynb 41
 def create_sim_dataset(model: nn.Module, # model to simulate from
                        ts: torch.Tensor, # Time points to simulate for
                        num_samples: int = 10, # Number of samples to generate
@@ -154,7 +155,7 @@ def create_sim_dataset(model: nn.Module, # model to simulate from
         states_list.append(ys)
     return SimODEData(ts_list, states_list, true_model=model)
 
-# %% ../nbs/00_training.ipynb 44
+# %% ../nbs/00_training.ipynb 43
 def plot_time_series(true_model: torch.nn.Module, # true underlying model for the simulated data
                      fit_model: torch.nn.Module, # model fit to the data
                      data: SimODEData, # data set to plot (scatter)
@@ -189,7 +190,7 @@ def plot_time_series(true_model: torch.nn.Module, # true underlying model for th
     plt.legend();
     return fig, ax
 
-# %% ../nbs/00_training.ipynb 45
+# %% ../nbs/00_training.ipynb 44
 def plot_phase_plane(true_model: torch.nn.Module, # true underlying model for the simulated data
                      fit_model: torch.nn.Module, # model fit to the data
                      data: SimODEData, # data set to plot (scatter)
@@ -225,7 +226,7 @@ def plot_phase_plane(true_model: torch.nn.Module, # true underlying model for th
     return fig, ax
 
 
-# %% ../nbs/00_training.ipynb 48
+# %% ../nbs/00_training.ipynb 47
 def train(model: torch.nn.Module, # Model to train
           data: SimODEData, # Data to train on
           lr: float = 1e-2, # learning rate for the Adam optimizer
@@ -234,7 +235,7 @@ def train(model: torch.nn.Module, # Model to train
           method = 'rk4', # ODE solver to use
           step_size: float = 0.10, # for fixed diffeq solver set the step size
           show_every: int = 10, # How often to print the loss function message
-          save_plots_every: int | None = None, # save a plot of the fit, to disable make this None
+          save_plots_every: Union[int,None] = None, # save a plot of the fit, to disable make this None
           model_name: str = "", #string for the model, used to reference the saved plots 
           *args: tuple, 
           **kwargs: dict
@@ -265,6 +266,7 @@ def train(model: torch.nn.Module, # Model to train
             running_loss += loss.item() # record loss
         if epoch % show_every == 0:
             print(f"Loss at {epoch}: {running_loss}")
+        # Use this to save plots of the fit every save_plots_every epochs
         if save_plots_every is not None and epoch % save_plots_every == 0:
             with torch.no_grad():
                 fig, ax = plot_time_series(data.true_model, model, data[0])
@@ -274,7 +276,7 @@ def train(model: torch.nn.Module, # Model to train
 
 
 
-# %% ../nbs/00_training.ipynb 81
+# %% ../nbs/00_training.ipynb 80
 class NeuralDiffEq(nn.Module):
     """ 
     Basic Neural ODE model
